@@ -9,7 +9,7 @@
 import cmd, sys
 import math
 import serial
-import signal
+import time
 
 SERIAL_PORT = 'com3'
 
@@ -29,17 +29,17 @@ class Interface(object):
         self.ser = serial.Serial(SERIAL_PORT, 9600, timeout=0)
 
     def send(self, deg):
-        try:
-            tmp = self.ser.read(size=3)
+        command = int(deg[0]).to_bytes(1, 'big')
+        self.ser.write(command)
+        print("Sent: {}".format(command))
+
+        time.sleep(0.01)
+
+        if self.ser.in_waiting:
+            tmp = self.ser.read(self.ser.in_waiting)
             #tmp = int.from_bytes(tmp, 'big', signed=False)
             print("Received: {}".format(tmp))
-        except:
-            pass
-        #print("Tilt up by %3.1f degrees." % deg[0])
-        command = int(deg[0]).to_bytes(1, 'big')
-        print("Sent: {}".format(command))
-        # Convert value to 2 byte format
-        self.ser.write(command)
+
 
     def quit(self):
         print('Shutting down node \'r_console\'...')
